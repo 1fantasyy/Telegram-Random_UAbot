@@ -2511,7 +2511,7 @@ async def start_raid(cid):
     elif mode == [3]:
 
         s = int(r.hget(c, 'side'))
-        chance1 = int(chance1)
+        chance1 = min(int(chance1), 2500000)
         chance2 = int(r.hget('convoy', 'power'))
         msg0 = f'{title} | Перехоплення гумконвою\n\n\U0001F4AA {chance1} | {chance2}'
         try:
@@ -2531,9 +2531,9 @@ async def start_raid(cid):
         else:
             r.hincrby('convoy', 'power', -chance1)
 
-        pack = 25000
+        pack = 50000
         if s == 3:
-            pack = 20000
+            pack = 45000
         pack = pack - 1000 * rocket
 
         reward = int(chance2 / pack - (diff / pack))

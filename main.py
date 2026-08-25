@@ -5978,11 +5978,11 @@ async def handle_query(call):
                                 if int(r.hget(c, 'side')) == 3:
                                     tier = int(r.hget(c, 'tier'))
                                     if tier == 2:
-                                        limit = 4
-                                    elif tier == 1:
-                                        limit = 5
-                                    else:
                                         limit = 3
+                                    elif tier == 1:
+                                        limit = 4
+                                    else:
+                                        limit = 2
                                 else:
                                     limit = 2
                                 if int(r.hget(uid, 'convoy_c')) < limit:
