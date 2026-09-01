@@ -1209,7 +1209,7 @@ async def merchant(message):
 async def donate(message):
     try:
         markup = InlineKeyboardMarkup()
-        url = f'https://send.monobank.ua/jar/3ju2efsD1D?t={message.from_user.id}+'
+        url = f'https://send.monobank.ua/jar/3ju2efsD1D?t={message.from_user.id}'
         markup.add(InlineKeyboardButton(text='\U0001F349 Задонатити', url=url))
         msg = 'Якщо хтось хоче підтримати автора, то може задонатити і отримати\n\U0001F31F погон російського ' \
               'генерала, який можна витратити в \n/donate_shop.\n\n\U0001F4B3 Ціна одного погону — 30 грн.' \
@@ -1229,7 +1229,7 @@ async def donated(message):
                     str(message.from_user.last_name) + '\n@' + str(message.from_user.username) + '\n\n' + message.text
         await bot.send_message(456514639, full_text, parse_mode='HTML')
         await bot.send_message(message.chat.id, '\u2705', reply_to_message_id=message.message_id)
-        if message.from_user.id == 456514639:
+        if message.from_user.id in (456514639, 861029700):
             try:
                 code = message.text.split(' ')
                 r.hincrby(int(code[1]), 'strap', int(code[2]))
