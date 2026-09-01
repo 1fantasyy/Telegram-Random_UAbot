@@ -1209,7 +1209,7 @@ async def merchant(message):
 async def donate(message):
     try:
         markup = InlineKeyboardMarkup()
-        url = f'https://send.monobank.ua/jar/3ju2efsD1D{message.from_user.id}+'
+        url = f'https://send.monobank.ua/jar/3ju2efsD1D={message.from_user.id}+'
         markup.add(InlineKeyboardButton(text='\U0001F349 Задонатити', url=url))
         msg = 'Якщо хтось хоче підтримати автора, то може задонатити і отримати\n\U0001F31F погон російського ' \
               'генерала, який можна витратити в \n/donate_shop.\n\n\U0001F4B3 Ціна одного погону — 30 грн.' \
