@@ -2531,9 +2531,9 @@ async def start_raid(cid):
         else:
             r.hincrby('convoy', 'power', -chance1)
 
-        pack = 60000
+        pack = 45000
         if s == 3:
-            pack = 50000
+            pack = 40000
         pack = pack - 1000 * rocket
 
         reward = int(chance2 / pack - (diff / pack))
