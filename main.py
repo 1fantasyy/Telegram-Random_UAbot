@@ -1225,10 +1225,6 @@ async def donate(message):
 @dp.message_handler(commands=['donated'])
 async def donated(message):
     if message.chat.type == 'private':
-        full_text = '<code>' + str(message.from_user.id) + '</code>\n' + str(message.from_user.first_name) + ' ' + \
-                    str(message.from_user.last_name) + '\n@' + str(message.from_user.username) + '\n\n' + message.text
-        await bot.send_message(456514639, full_text, parse_mode='HTML')
-        await bot.send_message(message.chat.id, '\u2705', reply_to_message_id=message.message_id)
         if message.from_user.id in (456514639, 861029700):
             try:
                 code = message.text.split(' ')
