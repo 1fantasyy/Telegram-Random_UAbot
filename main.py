@@ -1015,7 +1015,7 @@ async def i_top(message):
     except:
         pass
 '''
-
+'''
 @dp.message_handler(commands=['ctop'])
 async def c_top(message):
     try:
@@ -1026,7 +1026,7 @@ async def c_top(message):
         await message.reply(msg, parse_mode='HTML')
     except:
         pass
-
+'''
 
 @dp.message_handler(commands=['class'])
 async def classes(message):
