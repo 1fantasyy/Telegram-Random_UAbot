@@ -850,7 +850,7 @@ async def passport(message):
         deaths = f'\n\u2620\uFE0F Вбито русаків: {stats[2].decode()}\n\U0001F476 З`їдено немовлят: {stats[3].decode()}'
         if message.text.endswith(' -all'):
             active_promos = ['first_code', 'second_code', 'fifth_code', 'seventh_code',
-                             'ninth_code', 'fourteenth_code', 'fifteenth_code', 'seventeenth_code']
+                             'ninth_code', 'fourteenth_code', 'fifteenth_code', 'seventeenth_code', 'nineteenth_code']
             activated = 0
             for code in active_promos:
                 if str(message.from_user.id).encode() in r.smembers(code):
@@ -1392,6 +1392,19 @@ async def promo_code(message):
                                             '\U0001F31F +5\n\U0001F9C2 +15\n\U0001F9C2 +15\n\U0001F9C2 +15\n'
                                             '\U0001F9C2 +15\n\U0001F9C2 +15\n\U0001F9C2 +15\n\U0001F9C2 +15\n'
                                             '\U0001F9C2 +15\n\U0001F9C2 +15\n\U0001F9C2 +15\n')
+
+                elif msg.startswith('pa') and uid not in r.smembers('nineteenth_code'):
+                    msg = "\u26CF Промокод 1488 активовано!\n🌟 +1 🧂 +148 ☠ +148 📦 +1488"
+                    r.sadd('nineteenth_code', message.from_user.id)
+                    r.hincrby(message.from_user.id, 'strap', 1)
+                    r.hincrby(message.from_user.id, 'deaths', 148)
+                    r.hincrby(message.from_user.id, 'salt', 148)
+                    r.hincrby(message.from_user.id, 'packs', 1488)
+                    if r.hexists(message.from_user.id, 'name') and not int(r.hget(message.from_user.id, 'support')):
+                        r.hset(message.from_user.id, 'support', 11, {'s_support': 10})
+                        msg += '\n🧾 +1'
+                    await message.reply(msg)
+
                 #elif msg.startswith('east') and uid not in r.smembers('eighteenth_code'):
                 #    msg = '\u26CF Великодній промокод активовано!\n🧺 +10 🎰 +20 🧂 +30'
                 #    r.sadd('eighteenth_code', message.from_user.id)
