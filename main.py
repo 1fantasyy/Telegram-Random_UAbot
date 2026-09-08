@@ -996,7 +996,7 @@ async def l_top(message):
             await message.reply('В Соледарі ця команда недоступна.')
     except:
         pass
-
+'''
 
 @dp.message_handler(commands=['gtop'])
 async def g_top(message):
@@ -1014,7 +1014,7 @@ async def i_top(message):
         await message.reply(msg)
     except:
         pass
-'''
+
 '''
 @dp.message_handler(commands=['ctop'])
 async def c_top(message):
