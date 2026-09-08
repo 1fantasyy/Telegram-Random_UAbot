@@ -997,7 +997,7 @@ async def l_top(message):
     except:
         pass
 '''
-
+'''
 @dp.message_handler(commands=['gtop'])
 async def g_top(message):
     try:
@@ -1015,7 +1015,7 @@ async def i_top(message):
     except:
         pass
 
-'''
+
 @dp.message_handler(commands=['ctop'])
 async def c_top(message):
     try:
