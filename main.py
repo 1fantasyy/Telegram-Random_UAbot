@@ -2145,22 +2145,39 @@ async def clan_war(message):
                     except:
                         points2 = 0
                         title2 = '???'
-                    packs = points1 // 10
+                    packs = points1 // 5
                     salt, codes = 0, 0
                     msg = f'\U0001f4ef Війна з кланом {title2} завершена.\n\n' \
                           f'\U0001fa99 Ваші очки: {points1}\n' \
                           f'\U0001fa99 Очки ворога: {points2}\n\n'
                     if points1 < points2:
                         msg += 'Ви програли...'
+                        salt = 20
+                        codes = 3
                     elif points1 > points2:
                         msg += 'Ви виграли!'
-                        if tier == 3:
-                            salt = 5
-                        elif tier == 2:
-                            salt = 10
-                        elif tier == 1:
-                            codes = 5
-                            salt = 20
+                        salt = 50
+                        codes = 7
+                        if points2 > 0:
+                            diff_percent = ((points1 - points2) / points2) * 100
+                        else:
+                            diff_percent = 0
+                        if 5 <= diff_percent < 10:
+                            packs += 50
+                            salt += 10
+                            codes += 1
+                        elif 10 <= diff_percent < 15:
+                            packs += 75
+                            salt += 15
+                            codes += 2
+                        elif 20 <= diff_percent < 25:
+                            packs += 100
+                            salt += 25
+                            codes += 3
+                        elif diff_percent >= 25:
+                            packs += 200
+                            salt += 50
+                            codes += 5
                         if int(r.hget(c, 'result')) == 2:
                             packs *= 2
                     else:
