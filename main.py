@@ -851,7 +851,7 @@ async def passport(message):
         if message.text.endswith(' -all'):
             active_promos = ['first_code', 'second_code', 'fifth_code', 'seventh_code',
                              'ninth_code', 'fourteenth_code', 'fifteenth_code', 'seventeenth_code',
-                             'active_clan']
+                             'active_clan', 'secret']
             activated = 0
             for code in active_promos:
                 if str(message.from_user.id).encode() in r.smembers(code):
