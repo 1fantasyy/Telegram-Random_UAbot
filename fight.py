@@ -1675,6 +1675,16 @@ async def great_war(cid1, cid2, a, b, tid1, tid2):
         msg, reward = war_reward(cid2, cid1, msg, r_spirit, money, gen22, clan2, b, koj2, int(chance2))
     msg += ' перемагають!\n\U0001F3C5 +1 \U0001F3C6 +1 \U0001F4B5 +' + reward
     msg1 = msg2 = msg.replace('@', '')
+    promo_code = r.hget('promo_code', 'active_clan_promo_code')
+    if promo_code:
+        clan_wars1 = r.hincrby('c' + str(cid1), 'active_clan_wars', 1)
+        clan_wars2 = r.hincrby('c' + str(cid2), 'active_clan_wars', 1)
+        for member in a + b:
+            r.hincrby(member, 'active_clan_wars', 1)
+        if clan_wars1 == 100:
+            msg1 += '\n\n\U0001F389 Досягнуто 100 міжчатів!\n\U0001F4DD ' + promo_code.decode()
+        if clan_wars2 == 100:
+            msg2 += '\n\n\U0001F389 Досягнуто 100 міжчатів!\n\U0001F4DD ' + promo_code.decode()
     if not r.hexists(f'c{cid1}', 'hints') or int(r.hget(f'c{cid1}', 'hints')) == 0:
         msg1 += '\n\n/war'
     if not r.hexists(f'c{cid2}', 'hints') or int(r.hget(f'c{cid2}', 'hints')) == 0:

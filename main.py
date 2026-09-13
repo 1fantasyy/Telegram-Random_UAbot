@@ -1307,6 +1307,14 @@ async def promo_code(message):
                     #msg += '\n🧳 +10'
 
                     await message.reply(msg)
+                elif msg.startswith('exi') and uid not in r.smembers('active_clan') \
+                        and int(r.hget(message.from_user.id, 'active_clan_wars') or 0) >= 100:
+                    r.sadd('active_clan', message.from_user.id)
+                    r.hincrby(message.from_user.id, 'packs', 500)
+                    r.hincrby(message.from_user.id, 'salt', 100)
+                    r.hincrby(message.from_user.id, 'tape', 100)
+                    await message.reply('\u26CF Промокод активних гравців активовано!'
+                                        '\n\U0001F4E6 +500 \U0001F9C2 +100 🌀 +100')
                 elif msg.startswith('ran') and uid not in r.smembers('seventh_code'):
                     r.sadd('seventh_code', message.from_user.id)
                     if int(r.hget(message.from_user.id, 'weapon')) == 2:
@@ -2141,9 +2149,11 @@ async def clan_war(message):
 
                     try:
                         points2 = int(r.hget(c2, 'points'))
+                        q_points2 = int(r.hget(c2, 'q-points'))
                         title2 = r.hget(c2, 'title').decode()
                     except:
                         points2 = 0
+                        q_points2 = 0
                         title2 = '???'
                     packs = points1 // 5
                     salt, codes = 0, 0
@@ -2163,19 +2173,23 @@ async def clan_war(message):
                         else:
                             diff_percent = 0
                         if 5 <= diff_percent < 10:
-                            packs += 50
+                            if q_points2 >= 500:
+                                packs += 50
                             salt += 10
                             codes += 1
                         elif 10 <= diff_percent < 15:
-                            packs += 75
+                            if q_points2 >= 500:
+                                packs += 75
                             salt += 15
                             codes += 2
                         elif 20 <= diff_percent < 25:
-                            packs += 100
+                            if q_points2 >= 500:
+                                packs += 100
                             salt += 25
                             codes += 3
                         elif diff_percent >= 25:
-                            packs += 200
+                            if q_points2 >= 500:
+                                packs += 200
                             salt += 50
                             codes += 5
                         if int(r.hget(c, 'result')) == 2:
