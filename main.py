@@ -1384,7 +1384,7 @@ async def promo_code(message):
                         r.hset(message.from_user.id, 'support', 11, {'s_support': 10})
                         msg += '\n🧾 +1'
                     await message.reply(msg)
-                elif msg.startswith('35') and uid not in r.smembers('fifteenth_code'):
+                elif msg.startswith('42') and uid not in r.smembers('fifteenth_code'):
                     r.sadd('fifteenth_code', message.from_user.id)
                     r.hincrby(message.from_user.id, 'tape', 5)
                     r.hincrby(message.from_user.id, 'packs', 35)
