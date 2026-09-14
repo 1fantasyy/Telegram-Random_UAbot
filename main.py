@@ -1175,7 +1175,13 @@ async def merchant(message):
             r.hset('soledar', 'merchant_hour', randint(18, 22))
         if int(r.hget('soledar', 'merchant_day')) != datetime.now().day and \
                 int(r.hget('soledar', 'merchant_hour')) == datetime.now().hour:
-            slot, strap, tape = randint(1, 4), randint(1, 3), randint(20, 50)
+            slot = randint(1, 6)
+            if slot == 5:
+                strap, tape = randint(6, 7), randint(600, 700)
+            elif slot == 6:
+                strap, tape = randint(6, 10), randint(900, 1200)
+            else:
+                strap, tape = randint(1, 3), randint(20, 50)
             r.hset('soledar', 'merchant_slot', slot)
             r.hset('soledar', 'merchant_strap', strap)
             r.hset('soledar', 'merchant_tape', tape)
@@ -1386,11 +1392,11 @@ async def promo_code(message):
                     await message.reply(msg)
                 elif msg.startswith('42') and uid not in r.smembers('fifteenth_code'):
                     r.sadd('fifteenth_code', message.from_user.id)
-                    r.hincrby(message.from_user.id, 'tape', 5)
-                    r.hincrby(message.from_user.id, 'packs', 35)
-                    r.hincrby(message.from_user.id, 'salt', 35)
+                    r.hincrby(message.from_user.id, 'tape', 10)
+                    r.hincrby(message.from_user.id, 'packs', 42)
+                    r.hincrby(message.from_user.id, 'salt', 42)
                     await message.reply('\u26CF Промокод статистики активовано!\n'
-                                        '🌀 +5 \U0001F9C2 +35 \U0001F4E6 +35')
+                                        '🌀 +10 \U0001F9C2 +42 \U0001F4E6 +42')
                 elif msg.startswith('pas') and uid not in r.smembers('secret'):
                     r.sadd('secret', message.from_user.id)
                     r.hincrby(message.from_user.id, 'strap', 1)
@@ -5777,6 +5783,34 @@ async def handle_query(call):
             else:
                 await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
                                                 text='У вас вже є тактичний рюкзак з п\'ятим слотом')
+        elif call.data.startswith('expand_backpack5'):
+            if int(r.hget(uid, 'extra_slot')) == 4:
+                if int(r.hget(uid, 'strap')) >= 25:
+                    r.hincrby(uid, 'strap', -25)
+                    r.hset(uid, 'extra_slot', 5)
+                    r.sadd('backpackers', uid)
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Ви успішно купили тактичний рюкзак з шостим слотом!')
+                else:
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Недостатньо погонів на рахунку')
+            else:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='У вас вже є тактичний рюкзак з шостим слотом')
+        elif call.data.startswith('expand_backpack6'):
+            if int(r.hget(uid, 'extra_slot')) == 5:
+                if int(r.hget(uid, 'strap')) >= 30:
+                    r.hincrby(uid, 'strap', -30)
+                    r.hset(uid, 'extra_slot', 6)
+                    r.sadd('backpackers', uid)
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Ви успішно купили тактичний рюкзак з сьомим слотом!')
+                else:
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Недостатньо погонів на рахунку')
+            else:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='У вас вже є тактичний рюкзак з сьомим слотом')
 
     elif call.data.startswith('selected_dice'):
         await callback_dice(call)

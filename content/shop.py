@@ -52,7 +52,9 @@ def shop_msg(uid, mode):
                  '\U0001F392 Тактичний рюкзак - \U0001F31F 5': 'expand_backpack1',
                  '\U0001F392 Тактичний рюкзак - \U0001F31F 10': 'expand_backpack2',
                  '\U0001F392 Тактичний рюкзак - \U0001F31F 15': 'expand_backpack3',
-                 '\U0001F392 Тактичний рюкзак - \U0001F31F 20': 'expand_backpack4'}
+                 '\U0001F392 Тактичний рюкзак - \U0001F31F 20': 'expand_backpack4',
+                 '\U0001F392 Тактичний рюкзак - \U0001F31F 25': 'expand_backpack5',
+                 '\U0001F392 Тактичний рюкзак - \U0001F31F 30': 'expand_backpack6'}
         markup.add(InlineKeyboardButton(text='\U0001F304 - \U0001F31F 1', callback_data='premium1'),
                    InlineKeyboardButton(text='\U0001F307 - \U0001F31F 1', callback_data='premium3'),
                    InlineKeyboardButton(text='\U0001F309 - \U0001F31F 1', callback_data='premium4'))
@@ -70,6 +72,12 @@ def shop_msg(uid, mode):
                     markup.add(InlineKeyboardButton(text=key, callback_data=value))
             elif value == 'expand_backpack4':
                 if r.hexists(uid, 'extra_slot') and int(r.hget(uid, 'extra_slot')) == 3:
+                    markup.add(InlineKeyboardButton(text=key, callback_data=value))
+            elif value == 'expand_backpack5':
+                if r.hexists(uid, 'extra_slot') and int(r.hget(uid, 'extra_slot')) == 4:
+                    markup.add(InlineKeyboardButton(text=key, callback_data=value))
+            elif value == 'expand_backpack6':
+                if r.hexists(uid, 'extra_slot') and int(r.hget(uid, 'extra_slot')) == 5:
                     markup.add(InlineKeyboardButton(text=key, callback_data=value))
             else:
                 markup.add(InlineKeyboardButton(text=key, callback_data=value))
