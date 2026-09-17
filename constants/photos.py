@@ -43,6 +43,12 @@ premium3 = [
     'https://i.ibb.co/5jXnnFD/12.jpg'   # Жуков
 ]
 
+stalker = [
+    'https://i.ibb.co/Wvj3PqGk/stalker1.jpg',  # Фото 1
+    'https://i.ibb.co/B2gBkZ8t/stalker2.jpg',  # Фото 2
+    'https://i.ibb.co/gMxvSwp8/stalker3.jpg'   # Фото 3
+]
+
 chmonya = [  # Чмоня
     'https://i.ibb.co/ngmfj1Z/rusnya5.jpg',  # Без класу
     'https://i.ibb.co/mtbTnYj/hach.png',     # Хач

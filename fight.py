@@ -14,6 +14,77 @@ from content.quests import quest
 from content.inventory import check_set
 
 
+def sydorovych_class_info():
+    return choice([
+        ('медики', (9, 19, 29)),
+        ('фокусники', (3, 13, 23)),
+        ('бійці класу "Гарматне м`ясо"', (5, 15, 25))
+    ])
+
+
+async def start_sydorovych_raid(cid):
+    c = 'c' + str(cid)
+    fighters_key = 'sydorovych_fighters' + str(cid)
+    fighters = list(r.smembers(fighters_key))
+    required_name = r.hget(c, 'sydorovych_required_name').decode()
+    required_count = int(r.hget(c, 'sydorovych_required_count'))
+    required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
+    class_count = sum(int(r.hget(member, 'class')) in required_classes for member in fighters)
+    if class_count < required_count:
+        return False
+
+    power = sum(int(r.hget(member, 'strength')) for member in fighters)
+    enemy = choice(['сліпих псів', 'мутантів', 'бандитів'])
+    if enemy == 'сліпих псів':
+        enemy_power = int(power / 3)
+    elif enemy == 'мутантів':
+        enemy_power = int(power / 4)
+    else:
+        enemy_power = int(power * choice([0.5, 1]))
+
+    win = choices([True, False], weights=[power, enemy_power])[0]
+    r.delete(fighters_key)
+    r.hset(c, 'sydorovych_raid', 'finished')
+    if not win:
+        for member in fighters:
+            r.hincrby(member, 'injure', randint(5, 15))
+        await bot.send_message(cid, f'Русаки не впорались зі зграєю {enemy} і пішли зализувати рани.')
+        return True
+
+    if enemy in ('сліпих псів', 'мутантів'):
+        outcome = 'shop'
+    else:
+        outcome = choice(['pogony', 'money', 'shop'])
+
+    if outcome == 'pogony':
+        for member in fighters:
+            r.hincrby(member, 'strap', 1)
+        await bot.send_message(cid, 'У трупах кожен русак знайшов по 🌟 1 погону.')
+    elif outcome == 'money':
+        for member in fighters:
+            r.hincrby(member, 'money', 2000)
+        await bot.send_message(cid, 'У схованках знайшли по 💵 2000 гривень на кожного русака.')
+    else:
+        outcome = 'shop'
+
+    if outcome == 'shop':
+        expires = int(datetime.now().timestamp()) + 300
+        r.hset(c, 'sydorovych_shop_until', expires)
+        r.hset(c, 'sydorovych_photo_price', randint(5, 10))
+        r.delete(f'sydorovych_shop_candy{cid}', f'sydorovych_shop_oaz{cid}',
+                 f'sydorovych_shop_photo{cid}')
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text='🍬 30 цукерок Рошен - 🌟 2',
+                                        callback_data='sydorovych_buy_candy'))
+        markup.add(InlineKeyboardButton(text='🟡 Оаза - 🌟 1',
+                                        callback_data='sydorovych_buy_oaz'))
+        markup.add(InlineKeyboardButton(text='☣ Сталкерське фото - 🌟 '
+                        + str(r.hget(c, 'sydorovych_photo_price').decode()),
+                        callback_data='sydorovych_buy_photo'))
+        await bot.send_message(cid, 'Сидорович відкрив торгівлю на 5 хвилин.', reply_markup=markup)
+    return True
+
+
 async def fight(uid1, uid2, un1, un2, t, mid):
     info, wins1, wins2 = '', 0, 0
     can_earn1 = anti_clicker(uid1)
@@ -2358,9 +2429,14 @@ async def start_raid(cid):
 
             elif location == 'Підвал Сидоровича':
                 reward += 'Русаки завітали до підвалу Сидоровича\n\U0001F4B5 -100\n'
-                mode = choice([1, 2, 3, 4])
+                mode = choices([0, 1, 2, 3, 4], [60, 10, 10, 10, 10])[0]
                 items = 5
-                if mode == 1:
+                if mode == 0:
+                    reward += 'Сидорович просить допомогти його хлопцям відбитися від ворогів.'
+                    r.hset(c, 'sydorovych_raid', 'available')
+                    markup.add(InlineKeyboardButton(text='Допомогти хлопцям Сидоровича',
+                                                    callback_data='sydorovych_raid'))
+                elif mode == 1:
                     s = 3
                     if mar >= 1:
                         s *= 2

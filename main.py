@@ -11,7 +11,7 @@ from inline import prepare_to_fight, pastLife, earnings, political, love, \
     question, zradoMoga, penis, choose, beer, generator, race, gender, roll_push_ups, donate_to_zsu
 from parameters import spirit, vodka, intellect, hp, damage_weapon, damage_defense, damage_support, damage_head, \
     increase_trance
-from fight import fight, war, great_war, start_raid, guard_power
+from fight import fight, war, great_war, start_raid, guard_power, sydorovych_class_info, start_sydorovych_raid
 from methods import feed_rusak, mine_salt, checkClan, checkLeader, com, c_shop, top, itop, ctop, \
     wood, stone, cloth, brick, auto_clan_settings, q_points, anti_clicker, msg_fmt
 
@@ -19,9 +19,9 @@ from methods import feed_rusak, mine_salt, checkClan, checkLeader, com, c_shop, 
 from alerts.alert import generate_map
 from constants.names import names, names_case
 from constants.classes import class_name, icons, icons_simple
-from constants.photos import p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, premium, premium2, premium3, default
+from constants.photos import p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, premium, premium2, premium3, stalker, default
 from content.buttons import battle_button, battle_button_2, battle_button_3, \
-    battle_button_4, unpack, gift_unpack, create_clan, clan_set, invite, buy_tools
+    battle_button_4, sydorovych_raid_button, unpack, gift_unpack, create_clan, clan_set, invite, buy_tools
 from content.inventory import show_inventory, drop_item, change_item, upgrade_item, check_set, empty_backpack
 from content.merchant import merchant_msg
 from content.shop import shop_msg, salt_shop
@@ -3796,6 +3796,159 @@ async def handle_query(call):
         else:
             await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
                                             text='Ти або вже в битві, або в тебе відсутній русак')
+
+    elif call.data.startswith('sydorovych_raid'):
+        cid = call.message.chat.id
+        c = 'c' + str(cid)
+        uid = call.from_user.id
+        if str(uid).encode() not in r.smembers('cl' + str(cid)):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Допомагати можуть тільки члени цього клану.')
+        elif r.hget(c, 'sydorovych_raid') != b'available':
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Цей рейд вже недоступний.')
+        else:
+            required_name, required_classes = sydorovych_class_info()
+            required_count = randint(2, 3)
+            r.delete(f'sydorovych_fighters{cid}')
+            r.hset(c, 'sydorovych_raid', 'active', {
+                'sydorovych_required_name': required_name,
+                'sydorovych_required_count': required_count,
+                'sydorovych_required_classes': ','.join(map(str, required_classes)),
+                'sydorovych_raid_mid': call.message.message_id
+            })
+            msg = f'Сидорович просить допомогти його хлопцям. Потрібно {required_count} {required_name}.\n\n'
+            msg += 'У рейд можуть зайти будь-які члени клану, максимум 5 русаків.'
+            await bot.send_message(cid, msg, reply_markup=sydorovych_raid_button(),
+                                   message_thread_id=int(r.hget(c, 'thread')) if r.hget(c, 'thread') else None)
+            await bot.answer_callback_query(callback_query_id=call.id)
+
+    elif call.data.startswith('sydorovych_join'):
+        cid = call.message.chat.id
+        c = 'c' + str(cid)
+        uid = call.from_user.id
+        fighters_key = f'sydorovych_fighters{cid}'
+        if r.hget(c, 'sydorovych_raid') != b'active' or \
+                str(uid).encode() not in r.smembers('cl' + str(cid)):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Цей рейд вже недоступний або ти не в цьому клані.')
+        elif r.hexists(uid, 'name') == 0:
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='У тебе немає русака.')
+        elif str(uid).encode() in r.smembers(fighters_key):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Твій русак вже записаний у цей рейд.')
+        elif r.scard(fighters_key) >= 5:
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='У рейді вже максимум учасників.')
+        else:
+            r.hset(uid, 'firstname', call.from_user.first_name)
+            r.sadd(fighters_key, uid)
+            fighters = r.smembers(fighters_key)
+            names_list = ', '.join(r.hget(member, 'firstname').decode() for member in fighters)
+            required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
+            required_count = int(r.hget(c, 'sydorovych_required_count'))
+            class_count = sum(int(r.hget(member, 'class')) in required_classes for member in fighters)
+            markup = sydorovych_raid_button(class_count >= required_count)
+            await bot.edit_message_text(f'Сидорович просить допомоги.\n\nБійці: {names_list}\n'
+                                        f'Потрібно {r.hget(c, "sydorovych_required_name").decode()}: '
+                                        f'{class_count}/{required_count}',
+                                        cid, call.message.message_id, reply_markup=markup)
+            await call.answer()
+
+    elif call.data.startswith('sydorovych_start'):
+        cid = call.message.chat.id
+        c = 'c' + str(cid)
+        uid = call.from_user.id
+        fighters_key = f'sydorovych_fighters{cid}'
+        if r.hget(c, 'sydorovych_raid') != b'active' or \
+                str(uid).encode() not in r.smembers('cl' + str(cid)):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Цей рейд вже недоступний.')
+        else:
+            required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
+            required_count = int(r.hget(c, 'sydorovych_required_count'))
+            class_count = sum(int(r.hget(member, 'class')) in required_classes
+                              for member in r.smembers(fighters_key))
+            if class_count < required_count:
+                r.delete(fighters_key)
+                r.hset(c, 'sydorovych_raid', 'finished')
+                await bot.edit_message_text('Ви не змогли допомогти хлопцям Сидоровича: '
+                                            f'не вистачило русаків потрібного класу. Рейд провалено.',
+                                            cid, call.message.message_id)
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Рейд провалено.')
+            else:
+                await bot.edit_message_text('Сталкери вирушили допомагати хлопцям Сидоровича.',
+                                            cid, call.message.message_id)
+                await start_sydorovych_raid(cid)
+
+    elif call.data.startswith('sydorovych_buy_candy') or call.data.startswith('sydorovych_buy_oaz') or \
+            call.data.startswith('sydorovych_buy_photo'):
+        cid = call.message.chat.id
+        c = 'c' + str(cid)
+        uid = call.from_user.id
+        ts = int(datetime.now().timestamp())
+        if str(uid).encode() not in r.smembers('cl' + str(cid)):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Це пропозиція тільки для членів клану.')
+        elif not r.hexists(c, 'sydorovych_shop_until') or ts > int(r.hget(c, 'sydorovych_shop_until')):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Сидорович вже закрив торгівлю.')
+        elif call.data.startswith('sydorovych_buy_candy'):
+            key = f'sydorovych_shop_candy{cid}'
+            if str(uid).encode() in r.smembers(key):
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Ти вже купував цю пропозицію.')
+            elif int(r.hget(uid, 'strap')) < 2:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Недостатньо погонів.')
+            elif int(r.hget(uid, 'support')) != 12:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Для стакання Рошен у слоті вже мають бути цукерки Рошен.')
+            else:
+                r.hincrby(uid, 'strap', -2)
+                r.hincrby(uid, 's_support', 30)
+                r.sadd(key, uid)
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Ти купив 30 цукерок Рошен.')
+        elif call.data.startswith('sydorovych_buy_photo'):
+            key = f'sydorovych_shop_photo{cid}'
+            if str(uid).encode() in r.smembers(key):
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Ти вже купував цю пропозицію.')
+            elif int(r.hget(uid, 'strap')) < int(r.hget(c, 'sydorovych_photo_price')):
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Недостатньо погонів.')
+            else:
+                photo = choice(stalker)
+                if not photo:
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Сталкерські фото ще не додані.')
+                else:
+                    price = int(r.hget(c, 'sydorovych_photo_price'))
+                    r.hincrby(uid, 'strap', -price)
+                    r.hset(uid, 'photo', photo)
+                    r.sadd(key, uid)
+                    await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                    text='Ти купив сталкерське фото для свого русака.')
+        else:
+            key = f'sydorovych_shop_oaz{cid}'
+            if str(uid).encode() in r.smembers(key):
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Ти вже купував цю пропозицію.')
+            elif int(r.hget(uid, 'strap')) < 1:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Недостатньо погонів.')
+            elif int(r.hget(uid, 'support')) != 0:
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Для Оази слот допомоги має бути вільним.')
+            else:
+                r.hincrby(uid, 'strap', -1)
+                r.hset(uid, 'support', 20, {'s_support': 1})
+                r.sadd(key, uid)
+                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                                text='Ти купив Оазу.')
 
     elif call.data.startswith('raid_join') and r.hexists('c' + str(call.message.chat.id), 'start') == 1:
         if str(call.from_user.id).encode() not in r.smembers('fighters_3' + str(call.message.chat.id)) and \

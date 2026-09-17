@@ -40,6 +40,21 @@ def battle_button_4():
     return markup
 
 
+def sydorovych_button():
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(text='Допомогти хлопцям Сидоровича',
+                                    callback_data='sydorovych_raid'))
+    return markup
+
+
+def sydorovych_raid_button(can_start=False):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(text='Відправити русака', callback_data='sydorovych_join'))
+    if can_start:
+        markup.add(InlineKeyboardButton(text='Почати рейд', callback_data='sydorovych_start'))
+    return markup
+
+
 def invent(w, d, s, h):
     markup = InlineKeyboardMarkup()
     if w > 0 and d > 0:
