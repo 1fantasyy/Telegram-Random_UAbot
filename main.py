@@ -3849,39 +3849,16 @@ async def handle_query(call):
             required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
             required_count = int(r.hget(c, 'sydorovych_required_count'))
             class_count = sum(int(r.hget(member, 'class')) in required_classes for member in fighters)
-            markup = sydorovych_raid_button(class_count >= required_count)
+            markup = sydorovych_raid_button()
             await bot.edit_message_text(f'Сидорович просить допомоги.\n\nБійці: {names_list}\n'
                                         f'Потрібно {r.hget(c, "sydorovych_required_name").decode()}: '
                                         f'{class_count}/{required_count}',
                                         cid, call.message.message_id, reply_markup=markup)
-            await call.answer()
-
-    elif call.data.startswith('sydorovych_start'):
-        cid = call.message.chat.id
-        c = 'c' + str(cid)
-        uid = call.from_user.id
-        fighters_key = f'sydorovych_fighters{cid}'
-        if r.hget(c, 'sydorovych_raid') != b'active' or \
-                str(uid).encode() not in r.smembers('cl' + str(cid)):
-            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-                                            text='Цей рейд вже недоступний.')
-        else:
-            required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
-            required_count = int(r.hget(c, 'sydorovych_required_count'))
-            class_count = sum(int(r.hget(member, 'class')) in required_classes
-                              for member in r.smembers(fighters_key))
-            if class_count < required_count:
-                r.delete(fighters_key)
-                r.hset(c, 'sydorovych_raid', 'finished')
-                await bot.edit_message_text('Ви не змогли допомогти хлопцям Сидоровича: '
-                                            f'не вистачило русаків потрібного класу. Рейд провалено.',
-                                            cid, call.message.message_id)
-                await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-                                                text='Рейд провалено.')
-            else:
-                await bot.edit_message_text('Сталкери вирушили допомагати хлопцям Сидоровича.',
+            if len(fighters) >= 5:
+                await bot.edit_message_text('У рейді зібралося 5 русаків. Рейд починається.',
                                             cid, call.message.message_id)
                 await start_sydorovych_raid(cid)
+            await call.answer()
 
     elif call.data.startswith('sydorovych_buy_candy') or call.data.startswith('sydorovych_buy_oaz') or \
             call.data.startswith('sydorovych_buy_photo'):
@@ -4765,7 +4742,9 @@ async def handle_query(call):
             r.srem('class-' + str(clm), call.from_user.id)
             #r.hset(call.from_user.id, 'spirit', 0, {'strength': 100, 'intellect': 1, 'photo': choice(default),
             #                                        'class': 0, 'weapon': 0, 's_weapon': 0, 'defense': 0,
-            #                                        's_defense': 0, 'support': 0, 's_support': 0, 'mushrooms': 0})
+            # r.hset(call.from_user.id, 'class', 0, {'photo': choice(default)})
+            if int(r.hget(call.from_user.id, 'intellect')) < 5:
+                r.hset(call.from_user.id, 'intellect', 5)
             r.hincrby(call.from_user.id, 'deaths', 1)
             r.hincrby('all_deaths', 'deaths', 1)
             msg = '\u2620\uFE0F ' + names[name] + ' був убитий. \nОдним кацапом менше, а вторий насрав в штани.'

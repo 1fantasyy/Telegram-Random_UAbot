@@ -47,11 +47,9 @@ def sydorovych_button():
     return markup
 
 
-def sydorovych_raid_button(can_start=False):
+def sydorovych_raid_button():
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton(text='Відправити русака', callback_data='sydorovych_join'))
-    if can_start:
-        markup.add(InlineKeyboardButton(text='Почати рейд', callback_data='sydorovych_start'))
     return markup
 
 

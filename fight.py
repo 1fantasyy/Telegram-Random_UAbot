@@ -31,6 +31,9 @@ async def start_sydorovych_raid(cid):
     required_classes = tuple(map(int, r.hget(c, 'sydorovych_required_classes').decode().split(',')))
     class_count = sum(int(r.hget(member, 'class')) in required_classes for member in fighters)
     if class_count < required_count:
+        r.delete(fighters_key)
+        r.hset(c, 'sydorovych_raid', 'finished')
+        await bot.send_message(cid, 'Сидорович не зміг зібрати потрібну кількість сталкерів. Рейд невдалий.')
         return False
 
     power = sum(int(r.hget(member, 'strength')) for member in fighters)
@@ -42,13 +45,19 @@ async def start_sydorovych_raid(cid):
     else:
         enemy_power = int(power * choice([0.5, 1]))
 
+    await bot.send_message(cid, f'Сталкери вирушили на допомогу.\n\n'
+                               f'Противник: {enemy}\n'
+                               f'Сила русаків: {power}\n'
+                               f'Сила противника: {enemy_power}')
+    await sleep(2)
     win = choices([True, False], weights=[power, enemy_power])[0]
     r.delete(fighters_key)
     r.hset(c, 'sydorovych_raid', 'finished')
     if not win:
         for member in fighters:
             r.hincrby(member, 'injure', randint(5, 15))
-        await bot.send_message(cid, f'Русаки не впорались зі зграєю {enemy} і пішли зализувати рани.')
+        await bot.send_message(cid, f'Русаки не впорались із противником ({enemy}) і пішли зализувати рани. '
+                                   'Рейд провалено.')
         return True
 
     if enemy in ('сліпих псів', 'мутантів'):
@@ -59,11 +68,11 @@ async def start_sydorovych_raid(cid):
     if outcome == 'pogony':
         for member in fighters:
             r.hincrby(member, 'strap', 1)
-        await bot.send_message(cid, 'У трупах кожен русак знайшов по 🌟 1 погону.')
+        await bot.send_message(cid, 'Русаки перемогли. У трупах кожен знайшов по 🌟 1 погону.')
     elif outcome == 'money':
         for member in fighters:
             r.hincrby(member, 'money', 2000)
-        await bot.send_message(cid, 'У схованках знайшли по 💵 2000 гривень на кожного русака.')
+        await bot.send_message(cid, 'Русаки перемогли. У схованках знайшли по 💵 2000 гривень на кожного русака.')
     else:
         outcome = 'shop'
 
