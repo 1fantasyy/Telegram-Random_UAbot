@@ -38,6 +38,11 @@ async def start_sydorovych_raid(cid):
 
     power = sum(int(r.hget(member, 'strength')) for member in fighters)
     enemy = choice(['сліпих псів', 'мутантів', 'бандитів'])
+    enemy_title = {
+        'сліпих псів': 'Сліпі пси',
+        'мутантів': 'Мутанти',
+        'бандитів': 'Бандити'
+    }[enemy]
     if enemy == 'сліпих псів':
         enemy_power = int(power / 3)
     elif enemy == 'мутантів':
@@ -45,10 +50,10 @@ async def start_sydorovych_raid(cid):
     else:
         enemy_power = int(power * choice([0.5, 1]))
 
-    await bot.send_message(cid, f'Сталкери вирушили на допомогу.\n\n'
-                               f'Противник: {enemy}\n'
-                               f'Сила русаків: {power}\n'
-                               f'Сила противника: {enemy_power}')
+    title = r.hget(c, 'title').decode().replace('@', '')
+    await bot.send_message(cid, f'{title} | {enemy_title}\n\n'
+                               f'💪 {power} | {enemy_power}\n'
+                               f'Сталкери допомагають хлопцям Сидоровича проти ворога.')
     await sleep(2)
     win = choices([True, False], weights=[power, enemy_power])[0]
     r.delete(fighters_key)
@@ -77,13 +82,15 @@ async def start_sydorovych_raid(cid):
         outcome = 'shop'
 
     if outcome == 'shop':
+        await bot.send_message(cid, 'Сталкери впоралися та допомогли хлопцям Сидоровича.\n'
+                               'Сидорович відкриває свою торгівлю на 5 хвилин.')
         expires = int(datetime.now().timestamp()) + 300
         r.hset(c, 'sydorovych_shop_until', expires)
         r.hset(c, 'sydorovych_photo_price', randint(5, 10))
         r.delete(f'sydorovych_shop_candy{cid}', f'sydorovych_shop_oaz{cid}',
                  f'sydorovych_shop_photo{cid}')
         markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text='🍬 30 цукерок Рошен - 🌟 2',
+        markup.add(InlineKeyboardButton(text='🍬 25 цукерок Рошен - 🌟 2',
                                         callback_data='sydorovych_buy_candy'))
         markup.add(InlineKeyboardButton(text='🟡 Оаза - 🌟 1',
                                         callback_data='sydorovych_buy_oaz'))

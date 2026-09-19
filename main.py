@@ -3885,10 +3885,10 @@ async def handle_query(call):
                                                 text='Для стакання Рошен у слоті вже мають бути цукерки Рошен.')
             else:
                 r.hincrby(uid, 'strap', -2)
-                r.hincrby(uid, 's_support', 30)
+                r.hincrby(uid, 's_support', 25)
                 r.sadd(key, uid)
                 await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-                                                text='Ти купив 30 цукерок Рошен.')
+                                                text='Ти купив 25 цукерок Рошен.')
         elif call.data.startswith('sydorovych_buy_photo'):
             key = f'sydorovych_shop_photo{cid}'
             if str(uid).encode() in r.smembers(key):
