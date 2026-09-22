@@ -1396,7 +1396,7 @@ def open_gift4(uid, cdata, edit, cid):
                 msg = '⚪ У Донбаському рюкзаку лежить настоянка глоду.\n🫀 +1'
         elif ran == 2:
             spirit(3000, uid, 0)
-            msg = '⚪ У Донбаському рюкзаку лежить булочка з маком.\n💪 +3000'
+            msg = '⚪ У Донбаському рюкзаку лежить булочка з маком.\n\U0001F54A +3000'
         elif ran == 3:
             r.hincrby(uid, 'money', 50)
             msg = '⚪ У Донбаському рюкзаку лежить старий піджак, а в ньому русак знайшов заначку.\n💵 +50'
@@ -1416,12 +1416,8 @@ def open_gift4(uid, cdata, edit, cid):
             increase_trance(20, uid)
             msg = '🔵 У Донбаському рюкзаку лежить ящик рево.\n👊 +20'
         elif ran == 7:
-            food = 1
             r.hset(uid, 'time', 0)
-            if r.hexists(uid, 'time22'):
-                r.hset(uid, 'time22', 0)
-                food = 2
-            msg = f'🟣 Русак відкрив Донбаський рюкзак і знайшов тормозок.\n🍗 +{food}'
+            msg = '🟣 Русак відкрив Донбаський рюкзак і знайшов тормозок.\n🍗 +1'
         elif ran == 8:
             salt = randint(1, 5)
             r.hincrby(uid, 'salt', salt)
@@ -1443,7 +1439,7 @@ def open_gift4(uid, cdata, edit, cid):
                     spirit(5000, member, 0)
             except:
                 spirit(5000, uid, 0)
-            msg = '🟡 Після відкриття цього Донбаського рюкзака сталася бавовна...\n💪 +5000 всім'
+            msg = '🟡 Після відкриття цього Донбаського рюкзака сталася бавовна...\n\U0001F54A +5000 всім'
         elif ran == 13:
             if int(r.hget(uid, 'weapon')) == 6:
                 r.hincrby(uid, 's_weapon', 10)

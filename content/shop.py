@@ -81,8 +81,9 @@ def shop_msg(uid, mode):
                     markup.add(InlineKeyboardButton(text=key, callback_data=value))
             else:
                 markup.add(InlineKeyboardButton(text=key, callback_data=value))
-        #if str(uid).encode() in r.smembers('prigozhin'):
-        #    markup.add(InlineKeyboardButton(text='\U0001F304 Пригожин - \U0001F31F 1', callback_data='prigozhin'))
+        if str(uid).encode() in r.smembers('prigozhin_2026'):
+            markup.add(InlineKeyboardButton(text='\U0001F304 Пригожин - \U0001F31F 1',
+                                            callback_data='prigozhin'))
 
         #markup.add(InlineKeyboardButton(text='\U0001F9C2 5 - \U0001F31F 1', callback_data='5_salt'),
         #           InlineKeyboardButton(text='🧺 5 - \U0001F31F 1', callback_data='5_gifts'))

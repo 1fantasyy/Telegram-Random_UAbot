@@ -1738,7 +1738,7 @@ async def pack(message):
 async def pack(message):
     if r.hexists(message.from_user.id, 'name'):
         if r.hexists(message.from_user.id, 'packs_2026') and int(r.hget(message.from_user.id, 'packs_2026')) > 0:
-            await message.reply('🎒 Донбаський рюкзак: ' + str(int(r.hget(message.from_user.id, 'packs_2026'))) +
+            await message.reply('🎒 Донбаські рюкзаки: ' + str(int(r.hget(message.from_user.id, 'packs_2026'))) +
                                 '\n\nВідкрити?', reply_markup=gift_unpack_2026(message.from_user.id))
 
 
@@ -5757,7 +5757,10 @@ async def handle_query(call):
                                             text='Недостатньо погонів на рахунку, або русак без класу')
 
     elif call.data.startswith('prigozhin'):
-        if int(r.hget(call.from_user.id, 'strap')) >= 1:
+        if str(call.from_user.id).encode() not in r.smembers('prigozhin_2026'):
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Ця аватарка доступна лише тим, хто знайшов легендарну форму у Донбаському рюкзаку.')
+        elif int(r.hget(call.from_user.id, 'strap')) >= 1:
             r.hincrby(call.from_user.id, 'strap', -1)
             r.hset(call.from_user.id, 'photo', 'https://i.ibb.co/dMY198z/prig.jpg')
             await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
