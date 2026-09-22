@@ -1237,3 +1237,227 @@ def open_gift3(uid, cdata, edit, cid):
             return False
 
     return False
+
+
+#packs_2026
+# def open_gift4(uid, cdata, edit, cid):
+#     markup = InlineKeyboardMarkup()
+#     msg = ''
+#     if uid == int(cdata.split('_')[2]):
+#         if cdata.startswith('gift_unpack_'):
+#             if r.hexists(uid, 'packs_2026') and int(r.hget(uid, 'packs_2026')) > 0:
+#                 r.hincrby(uid, 'packs_2026', -1)
+#                 r.hincrby(uid, 'opened', 1)
+#                 r.hincrby('backpacks_2026', uid, 1)
+#
+#                 ran = choices([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+#                               weights=[20, 18, 15, 8, 9, 9, 3, 3, 3, 3, 3, 2, 2, 1, 1])
+#                 if ran == [1]:
+#                     ran = randint(1, 5)
+#                     if ran == 1:
+#                         r.hincrby(uid, 'strength', 1)
+#                         msg = '\u26AA У рюкзаку лежить шматочок ковбаси.\n\U0001F4AA +1'
+#                     elif ran == 2:
+#                         r.hincrby(uid, 'injure', 1)
+#                         msg = '\u26AA На дні рюкзака лежав циркуль.\n\U0001fa78 +1'
+#                     elif ran == 3:
+#                         r.hincrby(uid, 'sch', 1)
+#                         msg = '\u26AA Русак переплутав рюкзаки із сусідом, на що той вдарив його по голові.\n' \
+#                               '\U0001F464 +1'
+#                     elif ran == 4:
+#                         increase_trance(1, uid)
+#                         msg = '\u26AA У рюкзаку лежить кіндер-сюрприз.\n\U0001F44A +1'
+#                     elif ran == 5:
+#                         hp(1, uid)
+#                         msg = '\u26AA У рюкзаку лежить настоянка глоду.\n\U0001fac0 +1'
+#                 elif ran == [2]:
+#                     spirit(3000, uid, 0)
+#                     msg = '\u26AA У рюкзаку лежить булочка з маком.\n\U0001F54A +3000'
+#                 elif ran == [3]:
+#                     r.hincrby(uid, 'money', 50)
+#                     msg = '\u26AA У рюкзаку лежить старий піджак, а в ньому русак знайшов заначку.\n' \
+#                           '\U0001F4B5 +50'
+#                 elif ran == [4]:
+#                     msg = '\U0001f535 Хтось поклав у цей рюкзак цукерки Рошен.\n\U0001F9EA +2'
+#                     if int(r.hget(uid, 'support')) == 0:
+#                         r.hset(uid, 'support', 12)
+#                         r.hset(uid, 's_support', 2)
+#                     elif int(r.hget(uid, 'support')) not in (6, 10, 11, 20):
+#                         r.hincrby(uid, 's_support', 2)
+#                 elif ran == [5]:
+#                     msg = '\U0001f535 Ти думав, тут буде щось корисне? Тримай повістку!'
+#                     if int(r.hget(uid, 'support')) == 0:
+#                         r.hset(uid, 'support', 11)
+#                         r.hset(uid, 's_support', 10)
+#                     else:
+#                         markup.add(InlineKeyboardButton(text='Взяти повістку',
+#                                                         callback_data=f'gift_notice_{uid}'))
+#                 elif ran == [6]:
+#                     increase_trance(20, uid)
+#                     msg = '\U0001f535 У рюкзаку лежить ящик рево.\n\U0001F44A +20'
+#                 elif ran == [7]:
+#                     food = 1
+#                     r.hset(uid, 'time', 0)
+#                     if r.hexists(uid, 'time22'):
+#                         r.hset(uid, 'time22', 0)
+#                         food = 2
+#                     msg = f'\U0001f7e3 Русак відкрив рюкзак і знайшов тормозок.\n\U0001F957 +{food}'
+#                 elif ran == [8]:
+#                     ran = randint(1, 5)
+#                     r.hincrby(uid, 'salt', ran)
+#                     msg = f'\U0001f7e3 У цьому рюкзаку лежить упаковка Артемсолі.\n\U0001F9C2 +{ran}'
+#                 elif ran == [9]:
+#                     r.hincrby(uid, 'money', 500)
+#                     msg = '\U0001f7e3 У рюкзаку лежить конверт на штори.\n\U0001F4B5 +500'
+#                 elif ran == [10]:
+#                     ran = choice(['🎯', '🎲', '🎳', '⚽', '🏀', '🎰'])
+#                     r.hincrby(ran, uid, 5)
+#                     msg = f'\U0001f7e3 У рюкзаку лежать старі жетони для ігрових автоматів...\n' \
+#                           f'Русак може випробувати свою удачу.\n{ran} +5\n/casino'
+#                 elif ran == [11]:
+#                     r.hincrby(uid, 'tape', 1)
+#                     msg = '\U0001f7e3 У рюкзаку лежить якийсь чорний моток.\n🌀 +1'
+#                 elif ran == [12]:
+#                     try:
+#                         for mem in r.smembers(cid):
+#                             spirit(5000, mem, 0)
+#                     except:
+#                         spirit(5000, uid, 0)
+#                     msg = '\U0001f7e1 Після відкриття цього рюкзака сталася бавовна...\n' \
+#                           '\U0001F54A +5000 всім'
+#                 elif ran == [13]:
+#                     if int(r.hget(uid, 'weapon')) == 6:
+#                         r.hincrby(uid, 's_weapon', 10)
+#                     else:
+#                         markup.add(InlineKeyboardButton(text='Взяти скриньку Пандори',
+#                                                         callback_data=f'gift_box_{uid}'))
+#                     msg = '\U0001f7e1 Скринька Пандори [Зброя, міцність=10] - дарує ворогу подарунок у дуелі.'
+#                 elif ran == [14]:
+#                     r.hincrby(uid, 'strap', 1)
+#                     msg = '\U0001f7e1 У рюкзаку лежить стара армійська форма.\n\U0001F31F +1'
+#                 elif ran == [15]:
+#                     r.sadd('prigozhin_2026', uid)
+#                     msg = '\U0001f7e1 Щойно русак почав відкривати рюкзак, з нього полилося сліпуче сяйво...\n' \
+#                           'Невже... Невже це та сама легендарна форма...\n' \
+#                           '(Подивіться преміум-магазин)'
+#             else:
+#                 msg = 'Недостатньо рюкзаків.'
+#
+#             return msg, markup
+#
+#         elif cdata.startswith('gift_notice_'):
+#             r.hset(uid, 'support', 11)
+#             r.hset(uid, 's_support', 10)
+#             return edit, None
+#
+#         elif cdata.startswith('gift_box_'):
+#             if int(r.hget(uid, 'weapon')) == 6:
+#                 r.hincrby(uid, 's_weapon', 10)
+#             else:
+#                 r.hset(uid, 'weapon', 6)
+#                 r.hset(uid, 's_weapon', 10)
+#             return edit, None
+#
+#         else:
+#             return False
+#
+#     return False
+
+
+def open_gift4(uid, cdata, edit, cid):
+    markup = InlineKeyboardMarkup()
+    msg = ''
+    if uid != int(cdata.split('_')[-1]):
+        return False
+
+    if cdata.startswith('gift_unpack_2026_'):
+        if not r.hexists(uid, 'packs_2026') or int(r.hget(uid, 'packs_2026')) <= 0:
+            return False
+        r.hincrby(uid, 'packs_2026', -1)
+        r.hincrby(uid, 'opened', 1)
+        r.hincrby('backpacks_2026', uid, 1)
+        ran = choices(range(1, 16), weights=[20, 18, 15, 8, 9, 9, 3, 3, 3, 3, 3, 2, 2, 1, 1])[0]
+        if ran == 1:
+            effect = randint(1, 5)
+            if effect == 1:
+                r.hincrby(uid, 'strength', 1)
+                msg = '⚪ У рюкзаку лежить шматочок ковбаси.\n💪 +1'
+            elif effect == 2:
+                r.hincrby(uid, 'injure', 1)
+                msg = '⚪ На дні рюкзака лежав циркуль.\n🩸 +1'
+            elif effect == 3:
+                r.hincrby(uid, 'sch', 1)
+                msg = '⚪ Русак переплутав рюкзаки із сусідом, на що той вдарив його по голові.\n👤 +1'
+            elif effect == 4:
+                increase_trance(1, uid)
+                msg = '⚪ У рюкзаку лежить кіндер-сюрприз.\n👊 +1'
+            else:
+                hp(1, uid)
+                msg = '⚪ У рюкзаку лежить настоянка глоду.\n🫀 +1'
+        elif ran == 2:
+            spirit(3000, uid, 0)
+            msg = '⚪ У рюкзаку лежить булочка з маком.\n💪 +3000'
+        elif ran == 3:
+            r.hincrby(uid, 'money', 50)
+            msg = '⚪ У рюкзаку лежить старий піджак, а в ньому русак знайшов заначку.\n💵 +50'
+        elif ran == 4:
+            msg = '🔵 Хтось поклав у цей рюкзак цукерки Рошен.\n🧪 +2'
+            if int(r.hget(uid, 'support')) == 0:
+                r.hset(uid, 'support', 12, {'s_support': 2})
+            elif int(r.hget(uid, 'support')) not in (6, 10, 11, 20):
+                r.hincrby(uid, 's_support', 2)
+        elif ran == 5:
+            msg = '🔵 Ти думав, тут буде щось корисне? Тримай повістку!'
+            if int(r.hget(uid, 'support')) == 0:
+                r.hset(uid, 'support', 11, {'s_support': 10})
+            else:
+                markup.add(InlineKeyboardButton(text='Взяти повістку', callback_data=f'gift_notice_{uid}'))
+        elif ran == 6:
+            increase_trance(20, uid)
+            msg = '🔵 У рюкзаку лежить ящик рево.\n👊 +20'
+        elif ran == 7:
+            food = 1
+            r.hset(uid, 'time', 0)
+            if r.hexists(uid, 'time22'):
+                r.hset(uid, 'time22', 0)
+                food = 2
+            msg = f'🟣 Русак відкрив рюкзак і знайшов тормозок.\n🍗 +{food}'
+        elif ran == 8:
+            salt = randint(1, 5)
+            r.hincrby(uid, 'salt', salt)
+            msg = f'🟣 У цьому рюкзаку лежить упаковка Артемсолі.\n🧂 +{salt}'
+        elif ran == 9:
+            r.hincrby(uid, 'money', 500)
+            msg = '🟣 У рюкзаку лежить конверт на штори.\n💵 +500'
+        elif ran == 10:
+            casino = choice(['🎯', '🎲', '🎳', '⚽', '🏀', '🎰'])
+            r.hincrby(casino, uid, 5)
+            msg = f'🟣 У рюкзаку лежать старі жетони для ігрових автоматів...\n'
+            msg += f'Русак може випробувати свою удачу.\n{casino} +5\n/casino'
+        elif ran == 11:
+            r.hincrby(uid, 'tape', 1)
+            msg = '🟣 У рюкзаку лежить якийсь чорний моток.\n🌀 +1'
+        elif ran == 12:
+            try:
+                for member in r.smembers(cid):
+                    spirit(5000, member, 0)
+            except:
+                spirit(5000, uid, 0)
+            msg = '🟡 Після відкриття цього рюкзака сталася бавовна...\n💪 +5000 всім'
+        elif ran == 13:
+            if int(r.hget(uid, 'weapon')) == 6:
+                r.hincrby(uid, 's_weapon', 10)
+            else:
+                markup.add(InlineKeyboardButton(text='Взяти скриньку Пандори',
+                                                callback_data=f'gift_box_{uid}'))
+            msg = '🟡 Скринька Пандори [Зброя, міцність=10] - дарує ворогу подарунок у дуелі.'
+        elif ran == 14:
+            r.hincrby(uid, 'strap', 1)
+            msg = '🟡 У рюкзаку лежить стара армійська форма.\n🌟 +1'
+        else:
+            r.sadd('prigozhin_2026', uid)
+            msg = '🟡 Щойно русак почав відкривати рюкзак, з нього полилося сліпуче сяйво...\n'
+            msg += 'Невже це та сама легендарна форма...\n(Подивіться преміум-магазин)'
+        return msg, markup
+
+    return False
