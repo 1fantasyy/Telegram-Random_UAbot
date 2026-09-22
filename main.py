@@ -21,7 +21,7 @@ from constants.names import names, names_case
 from constants.classes import class_name, icons, icons_simple
 from constants.photos import p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, premium, premium2, premium3, stalker, default
 from content.buttons import battle_button, battle_button_2, battle_button_3, \
-    battle_button_4, sydorovych_raid_button, unpack, gift_unpack, gift_unpack_2026, create_clan, clan_set, invite, buy_tools
+    battle_button_4, sydorovych_raid_button, unpack, gift_unpack_2026, create_clan, clan_set, invite, buy_tools
 from content.inventory import show_inventory, drop_item, change_item, upgrade_item, check_set, empty_backpack
 from content.merchant import merchant_msg
 from content.shop import shop_msg, salt_shop
@@ -1738,16 +1738,8 @@ async def pack(message):
 async def pack(message):
     if r.hexists(message.from_user.id, 'name'):
         if r.hexists(message.from_user.id, 'packs_2026') and int(r.hget(message.from_user.id, 'packs_2026')) > 0:
-            await message.reply('🎒 Рюкзаки 2026: ' + str(int(r.hget(message.from_user.id, 'packs_2026'))) +
+            await message.reply('🎒 Донбаський рюкзак: ' + str(int(r.hget(message.from_user.id, 'packs_2026'))) +
                                 '\n\nВідкрити?', reply_markup=gift_unpack_2026(message.from_user.id))
-        if r.hexists(message.from_user.id, 'packs_2024_2'):
-            packs = int(r.hget(message.from_user.id, 'packs_2024_2'))
-            if packs != 0:
-                if message.chat.id != -1001211933154:
-                    await message.reply('🧺 Донбаські кошики: ' + str(packs) + '\n\nВідкрити?',
-                                        reply_markup=gift_unpack(message.from_user.id))
-                else:
-                    await message.reply('Відкривайте в іншому місці')
 
 
 @dp.message_handler(commands=['skills'])
