@@ -14,6 +14,25 @@ from content.quests import quest
 from content.inventory import check_set
 
 
+def special_battle_location(cid, regular_locations):
+    chance = r.hget('battle_special_chance', cid)
+    chance = int(chance) if chance is not None else 0
+    special_locations = r.smembers('battle_special_locations')
+    if not special_locations or randint(1, 100) > chance:
+        return choice(regular_locations)
+
+    location_key = choice(list(special_locations)).decode()
+    location = r.hget('battle_special_location_names', location_key)
+    if location:
+        return location.decode()
+    return choice(regular_locations)
+
+
+def special_battle_name(location_key):
+    location = r.hget('battle_special_location_names', location_key)
+    return location.decode() if location else ''
+
+
 def sydorovych_class_info():
     return choice([
         ('медики', (9, 19, 29)),
@@ -1382,7 +1401,32 @@ async def war(cid, location, big_battle):
         class_reward = '\U0001F695: \U0001F4E6 +1'
         r.hincrby(win, 'packs', 1)
 
-    if location == 'Битва на овечій фермі':
+    location_makiivske_ptu = special_battle_name('makiivske_ptu')
+    location_stolovka = special_battle_name('stolovka')
+    location_luhanska_bursa = special_battle_name('luhanska_bursa')
+    if location == location_makiivske_ptu:
+        reward = ''
+        class_reward = '\U0001F392 +1'
+        r.hincrby(win, 'packs_2026', 1)
+    elif location == location_stolovka:
+        winner = winner.replace(' перемагає!', ' перемагає!\n\nАле їжа виявилася отруєною, подарунки отримали всі інші.')
+        reward = ''
+        class_reward = ''
+        for member in r.smembers('fighters' + str(cid)):
+            if int(member) != win:
+                r.hincrby(member, 'packs_2026', 1)
+    elif location == location_luhanska_bursa:
+        gift_count = choice([0, 2])
+        reward = ''
+        if gift_count:
+            winner = '\n\nРусаки перемогли!'
+            class_reward = '\n\U0001F392 +2 кожному учаснику'
+            for member in r.smembers('fighters' + str(cid)):
+                r.hincrby(member, 'packs_2026', gift_count)
+        else:
+            winner = '\n\nРусаків відлупашили, вони повертаються ні з чим.'
+            class_reward = ''
+    elif location == 'Битва на овечій фермі':
         if wc == 1 or wc == 11 or wc == 21:
             spirit(3000, win, 0)
             increase_trance(5, win)

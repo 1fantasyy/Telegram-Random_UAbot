@@ -11,7 +11,8 @@ from inline import prepare_to_fight, pastLife, earnings, political, love, \
     question, zradoMoga, penis, choose, beer, generator, race, gender, roll_push_ups, donate_to_zsu
 from parameters import spirit, vodka, intellect, hp, damage_weapon, damage_defense, damage_support, damage_head, \
     increase_trance
-from fight import fight, war, great_war, start_raid, guard_power, sydorovych_class_info, start_sydorovych_raid
+from fight import fight, war, great_war, start_raid, guard_power, special_battle_location, \
+    sydorovych_class_info, start_sydorovych_raid
 from methods import feed_rusak, mine_salt, checkClan, checkLeader, com, c_shop, top, itop, ctop, \
     wood, stone, cloth, brick, auto_clan_settings, q_points, anti_clicker, msg_fmt
 
@@ -3648,12 +3649,16 @@ async def handle_query(call):
                         disable_web_page_preview=True)
 
                 if fighters_num >= maximum:
-                    ran = choice(['Битва в Соледарі', 'Битва на овечій фермі', 'Битва на покинутому заводі',
-                                  'Битва в темному лісі', 'Битва біля старого дуба', 'Битва в житловому районі',
-                                  'Битва біля поліцейського відділку', 'Битва в офісі ОПЗЖ',
-                                  'Битва в серверній кімнаті', 'Штурм Горлівки', 'Штурм ДАП', 'Битва в психлікарні',
-                                  'Висадка в Чорнобаївці', 'Битва в темному провулку', 'Битва біля розбитої колони',
-                                  'Розгром командного пункту', 'Битва на аномальному полі', 'Битва за фріспіни'])
+                    ran = special_battle_location(call.message.chat.id,
+                                                   ['Битва в Соледарі', 'Битва на овечій фермі',
+                                                    'Битва на покинутому заводі', 'Битва в темному лісі',
+                                                    'Битва біля старого дуба', 'Битва в житловому районі',
+                                                    'Битва біля поліцейського відділку', 'Битва в офісі ОПЗЖ',
+                                                    'Битва в серверній кімнаті', 'Штурм Горлівки', 'Штурм ДАП',
+                                                    'Битва в психлікарні', 'Висадка в Чорнобаївці',
+                                                    'Битва в темному провулку', 'Битва біля розбитої колони',
+                                                    'Розгром командного пункту', 'Битва на аномальному полі',
+                                                    'Битва за фріспіни'])
                     big_battle = True
                     try:
                         mid = int(r.hget('battle' + str(call.message.chat.id), 'pin'))
@@ -3670,7 +3675,8 @@ async def handle_query(call):
         if call.from_user.id == int(r.hget('battle' + str(call.message.chat.id), 'starter')):
             await bot.edit_message_text(text=call.message.text + '\n\nБій почався...',
                                         chat_id=call.message.chat.id, message_id=call.message.message_id)
-            ran = choice(['Битва в Соледарі', 'Штурм Горлівки', 'Штурм ДАП'])
+            ran = special_battle_location(call.message.chat.id,
+                                           ['Битва в Соледарі', 'Штурм Горлівки', 'Штурм ДАП'])
             big_battle = False
             try:
                 await bot.unpin_chat_message(chat_id=call.message.chat.id,
