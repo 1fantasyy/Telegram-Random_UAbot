@@ -33,6 +33,17 @@ def special_battle_name(location_key):
     return location.decode() if location else ''
 
 
+def close_sydorovych_raid(cid):
+    c = 'c' + str(cid)
+    if r.hget(c, 'sydorovych_raid') in (b'available', b'active'):
+        r.delete(f'sydorovych_fighters{cid}')
+        r.hset(c, 'sydorovych_raid', 'finished')
+        r.hdel(c, 'sydorovych_required_name', 'sydorovych_required_count',
+               'sydorovych_required_classes', 'sydorovych_raid_mid')
+        return True
+    return False
+
+
 def sydorovych_class_info():
     return choice([
         ('медики', (9, 19, 29)),
@@ -56,18 +67,18 @@ async def start_sydorovych_raid(cid):
         return False
 
     power = sum(int(r.hget(member, 'strength')) for member in fighters)
-    enemy = choice(['сліпих псів', 'мутантів', 'бандитів'])
+    enemy = choices(['сліпих псів', 'мутантів', 'бандитів'], weights=[15, 15, 75])[0]
     enemy_title = {
         'сліпих псів': 'Сліпі пси',
         'мутантів': 'Мутанти',
         'бандитів': 'Бандити'
     }[enemy]
     if enemy == 'сліпих псів':
-        enemy_power = int(power / 3)
+        enemy_power = int(power / 2)
     elif enemy == 'мутантів':
-        enemy_power = int(power / 4)
+        enemy_power = int(power * 0.75)
     else:
-        enemy_power = int(power * choice([0.5, 1]))
+        enemy_power = int(power * choice([0.5, 1, 2]))
 
     title = r.hget(c, 'title').decode().replace('@', '')
     await bot.send_message(cid, f'{title} | {enemy_title}\n\n'
@@ -87,7 +98,7 @@ async def start_sydorovych_raid(cid):
     if enemy in ('сліпих псів', 'мутантів'):
         outcome = 'shop'
     else:
-        outcome = choice(['pogony', 'money', 'shop'])
+        outcome = choices(['money', 'shop', 'pogony'], weights=[70, 15, 15])[0]
 
     if outcome == 'pogony':
         for member in fighters:

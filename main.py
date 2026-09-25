@@ -12,7 +12,7 @@ from inline import prepare_to_fight, pastLife, earnings, political, love, \
 from parameters import spirit, vodka, intellect, hp, damage_weapon, damage_defense, damage_support, damage_head, \
     increase_trance
 from fight import fight, war, great_war, start_raid, guard_power, special_battle_location, \
-    sydorovych_class_info, start_sydorovych_raid
+    close_sydorovych_raid, sydorovych_class_info, start_sydorovych_raid
 from methods import feed_rusak, mine_salt, checkClan, checkLeader, com, c_shop, top, itop, ctop, \
     wood, stone, cloth, brick, auto_clan_settings, q_points, anti_clicker, msg_fmt
 
@@ -3216,12 +3216,17 @@ async def raid(message):
 
                     if int(datetime.now().timestamp()) - int(r.hget(c, 'raid_ts2')) > cooldown:
                         try:
+                            sydorovych_closed = close_sydorovych_raid(message.chat.id)
                             try:
                                 await bot.delete_message(message.chat.id, message.message_id)
                             except:
                                 pass
                             a = await bot.send_message(message.chat.id, '\U0001F4B0 Починається рейд...\n\n',
                                                        reply_markup=battle_button_4(), disable_web_page_preview=True,
+                                                       message_thread_id=tid)
+                            if sydorovych_closed:
+                                await bot.send_message(message.chat.id,
+                                                       'Рейд Сидоровича закрито: русаки вирушили у звичайний рейд.',
                                                        message_thread_id=tid)
                             r.hset(c, 'start', a.message_id)
                             r.hset(c, 'starter', message.from_user.id)
