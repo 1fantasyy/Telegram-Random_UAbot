@@ -16,8 +16,14 @@ from content.inventory import check_set
 
 def special_battle_location(cid, regular_locations):
     chance = r.hget('battle_special_chance', cid)
-    chance = int(chance) if chance is not None else 0
-    special_locations = r.smembers('battle_special_locations')
+    chance = int(chance) if chance is not None else 20
+    special_locations = []
+    for location_key in r.smembers('battle_special_locations'):
+        allowed_chats_key = f'battle_special_location_chats:{location_key.decode()}'
+        allowed_chats = r.smembers(allowed_chats_key)
+        if allowed_chats and str(cid).encode() not in allowed_chats:
+            continue
+        special_locations.append(location_key)
     if not special_locations or randint(1, 100) > chance:
         return choice(regular_locations)
 
@@ -67,7 +73,7 @@ async def start_sydorovych_raid(cid):
         return False
 
     power = sum(int(r.hget(member, 'strength')) for member in fighters)
-    enemy = choices(['сліпих псів', 'мутантів', 'бандитів'], weights=[15, 15, 75])[0]
+    enemy = choices(['сліпих псів', 'мутантів', 'бандитів'], weights=[15, 15, 70])[0]
     enemy_title = {
         'сліпих псів': 'Сліпі пси',
         'мутантів': 'Мутанти',
@@ -538,7 +544,7 @@ async def fight(uid1, uid2, un1, un2, t, mid):
 
         if weapon2 == 6:
             weapon = '\n\n\U0001F381 ' + names[name1] + ' отримав подарунок від свого суперника...'
-            r.hincrby(uid1, 'packs_2024_2', 1)
+            r.hincrby(uid1, 'packs_2026', 1)
             damage_weapon(uid2, c2)
 
         if weapon2 == 2 and t == 1 and int(r.hget(uid1, 'strength')) > 2000:
@@ -1431,7 +1437,7 @@ async def war(cid, location, big_battle):
         reward = ''
         if gift_count:
             winner = '\n\nРусаки перемогли!'
-            class_reward = '\n\U0001F392 +2 кожному учаснику'
+            class_reward = '\n\+2\U0001F392 кожному учаснику'
             for member in r.smembers('fighters' + str(cid)):
                 r.hincrby(member, 'packs_2026', gift_count)
         else:
