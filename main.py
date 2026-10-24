@@ -1220,7 +1220,7 @@ async def donate(message):
         url = f'https://send.monobank.ua/jar/3ju2efsD1D?t={message.from_user.id}'
         markup.add(InlineKeyboardButton(text='\U0001F349 Задонатити', url=url))
         msg = 'Якщо хтось хоче підтримати автора, то може задонатити і отримати\n\U0001F31F погон російського ' \
-              'генерала, який можна витратити в \n/donate_shop.\n\n\U0001F4B3 Ціна одного погону — 30 грн.' \
+              'генерала, який можна витратити в \n/donate_shop.\n\n\U0001F4B3 Акційна ціна одного погону — 20 грн.' \
               '\n\u274C <b>Не стирайте введені дані в описі!</b> ' \
               'Це ваш айді в тг, після нього можна додати кілька слів для автора.'
         await bot.send_message(message.from_user.id, msg, reply_markup=markup, protect_content=True, parse_mode='HTML')
@@ -5567,7 +5567,7 @@ async def handle_query(call):
 
     elif call.data.startswith('donate'):
         await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-                                        text='Один погон коштує 30 гривень. Для отримання погонів скиньте на карту '
+                                        text='Акційна ціна одного погону — 20 гривень. Для отримання погонів скиньте на карту '
                                              'потрібну суму і введіть боту в пп \n/donated <будь-яке повідомлення>'
                                              '\nНарахування погонів триватиме до 24 годин.')
 
@@ -5578,6 +5578,16 @@ async def handle_query(call):
             quest(call.from_user.id, 3, -2, 4)
             await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
                                             text='Ви успішно замовили 40 донбаських пакунків')
+        else:
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Недостатньо погонів на рахунку')
+
+    elif call.data.startswith('5_backpacks'):
+        if int(r.hget(call.from_user.id, 'strap')) >= 1:
+            r.hincrby(call.from_user.id, 'strap', -1)
+            r.hincrby(call.from_user.id, 'packs_2026', 5)
+            await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                            text='Ви успішно купили 5 Донбаських рюкзаків')
         else:
             await bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
                                             text='Недостатньо погонів на рахунку')

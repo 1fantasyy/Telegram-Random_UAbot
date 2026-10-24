@@ -1437,7 +1437,7 @@ async def war(cid, location, big_battle):
         reward = ''
         if gift_count:
             winner = '\n\nРусаки перемогли!'
-            class_reward = '\n\+2\U0001F392 кожному учаснику'
+            class_reward = '\n+2\U0001F392 кожному учаснику'
             for member in r.smembers('fighters' + str(cid)):
                 r.hincrby(member, 'packs_2026', gift_count)
         else:
