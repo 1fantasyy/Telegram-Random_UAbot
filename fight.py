@@ -1387,10 +1387,11 @@ async def war(cid, location, big_battle):
     user_name = r.hget(win, 'firstname').decode().replace('@', '')
     winner = '\n\n\U0001F3C6 ' + ' ' + f'<a href="tg://user?id={win}">{user_name}</a>' + ' перемагає!'
 
+    battle_reward_multiplier = 3 if cid == -1001211933154 else 2
     if not big_battle:
-        reward = '\n\n\U0001F3C6 +1 \U0001F4B5 +5\n'
-        r.hincrby(win, 'wins', 1)
-        r.hincrby(win, 'money', 5)
+        reward = f'\n\n\U0001F3C6 +{battle_reward_multiplier} \U0001F4B5 +{5 * battle_reward_multiplier}\n'
+        r.hincrby(win, 'wins', battle_reward_multiplier)
+        r.hincrby(win, 'money', 5 * battle_reward_multiplier)
     elif location == 'Висадка в Чорнобаївці':
         winner = ''
         n = randint(5, 10)
@@ -1403,57 +1404,58 @@ async def war(cid, location, big_battle):
         money = 10
         if checkClan(win, building='build3', level=4) and wc in (31, 32, 33):
             money = 15
-        reward = f'\n\n\U0001F3C5 +1 \U0001F3C6 +1 \U0001F4B5 +{money}'
+        money *= battle_reward_multiplier
+        reward = f'\n\n\U0001F3C5 +1 \U0001F3C6 +{battle_reward_multiplier} \U0001F4B5 +{money}'
         if randint(1, 4) == 4:
             if checkClan(win) and int(r.hget('c' + r.hget(win, 'clan').decode(), 'buff_4')) == 12:
                 q_points(win, 3)
                 reward += ' \U0001fa99 +3'
         r.hincrby(win, 'trophy', 1)
         r.hincrby('all_trophy', 'trophy', 1)
-        r.hincrby(win, 'wins', 1)
+        r.hincrby(win, 'wins', battle_reward_multiplier)
         r.hincrby(win, 'money', money)
     class_reward = ''
 
     if wc in (31, 32, 33) and location != 'Висадка в Чорнобаївці' and big_battle:
-        class_reward = '\U0001F695: \U0001F4E6 +1'
-        r.hincrby(win, 'packs', 1)
+        class_reward = f'\U0001F695: \U0001F4E6 +{battle_reward_multiplier}'
+        r.hincrby(win, 'packs', battle_reward_multiplier)
 
     location_makiivske_ptu = special_battle_name('makiivske_ptu')
     location_stolovka = special_battle_name('stolovka')
     location_luhanska_bursa = special_battle_name('luhanska_bursa')
     if location == location_makiivske_ptu:
         reward = ''
-        class_reward = '\U0001F392 +1'
-        r.hincrby(win, 'packs_2026', 1)
+        class_reward = f'\U0001F392 +{battle_reward_multiplier}'
+        r.hincrby(win, 'packs_2026', battle_reward_multiplier)
     elif location == location_stolovka:
         winner = winner.replace(' перемагає!', ' перемагає!\n\nАле їжа виявилася отруєною, подарунки отримали всі інші.')
         reward = ''
         class_reward = ''
         for member in r.smembers('fighters' + str(cid)):
             if int(member) != win:
-                r.hincrby(member, 'packs_2026', 1)
+                r.hincrby(member, 'packs_2026', battle_reward_multiplier)
     elif location == location_luhanska_bursa:
         gift_count = choice([0, 2])
         reward = ''
         if gift_count:
             winner = '\n\nРусаки перемогли!'
-            class_reward = '\n+2\U0001F392 кожному учаснику'
+            class_reward = f'\n+{gift_count * battle_reward_multiplier}\U0001F392 кожному учаснику'
             for member in r.smembers('fighters' + str(cid)):
-                r.hincrby(member, 'packs_2026', gift_count)
+                r.hincrby(member, 'packs_2026', gift_count * battle_reward_multiplier)
         else:
             winner = '\n\nРусаків відлупашили, вони повертаються ні з чим.'
             class_reward = ''
     elif location == 'Битва на овечій фермі':
         if wc == 1 or wc == 11 or wc == 21:
-            spirit(3000, win, 0)
-            increase_trance(5, win)
-            class_reward = '\U0001F919: \U0001F44A +5 \U0001F54A +3000'
+            spirit(3000 * battle_reward_multiplier, win, 0)
+            increase_trance(5 * battle_reward_multiplier, win)
+            class_reward = f'\U0001F919: \U0001F44A +{5 * battle_reward_multiplier} \U0001F54A +{3000 * battle_reward_multiplier}'
     elif location == 'Битва на покинутому заводі':
         if wc == 2 or wc == 12 or wc == 22:
-            class_reward = '\U0001F9F0: \U0001F4B5 +5 \u2622 +10'
-            r.hincrby(win, 'money', 5)
-            r.hincrby(win, 'vodka', 10)
-            r.hincrby('all_vodka', 'vodka', 10)
+            class_reward = f'\U0001F9F0: \U0001F4B5 +{5 * battle_reward_multiplier} \u2622 +{10 * battle_reward_multiplier}'
+            r.hincrby(win, 'money', 5 * battle_reward_multiplier)
+            r.hincrby(win, 'vodka', 10 * battle_reward_multiplier)
+            r.hincrby('all_vodka', 'vodka', 10 * battle_reward_multiplier)
     elif location == 'Битва в темному лісі':
         if wc == 3 or wc == 13 or wc == 23:
             class_reward = '\U0001F52E: \U0001F54A +2000\n\U0001F54A -1000 всім іншим учасникам битви.'
@@ -1464,68 +1466,68 @@ async def war(cid, location, big_battle):
             spirit(2000, win, 0)
     elif location == 'Битва біля старого дуба':
         if wc == 4 or wc == 14 or wc == 24:
-            class_reward = '\U0001F5FF: \U0001F54A +10000'
-            spirit(10000, win, 0)
+            class_reward = f'\U0001F5FF: \U0001F54A +{10000 * battle_reward_multiplier}'
+            spirit(10000 * battle_reward_multiplier, win, 0)
     elif location == 'Битва в житловому районі':
         if wc == 5 or wc == 15 or wc == 25:
-            class_reward = '\U0001fa96: \u2622 +15'
-            r.hincrby(win, 'vodka', 15)
-            r.hincrby('all_vodka', 'vodka', 15)
+            class_reward = f'\U0001fa96: \u2622 +{15 * battle_reward_multiplier}'
+            r.hincrby(win, 'vodka', 15 * battle_reward_multiplier)
+            r.hincrby('all_vodka', 'vodka', 15 * battle_reward_multiplier)
     elif location == 'Битва біля поліцейського відділку':
         if wc == 6 or wc == 16 or wc == 26:
-            class_reward = '\U0001F46E: \U0001F4B5 +5'
-            r.hincrby(win, 'money', 5)
+            class_reward = f'\U0001F46E: \U0001F4B5 +{5 * battle_reward_multiplier}'
+            r.hincrby(win, 'money', 5 * battle_reward_multiplier)
             if int(r.hget(win, 'defense')) in (16, 17, 18):
-                r.hincrby(win, 's_defense', 10)
-                class_reward = '\U0001F46E: \U0001F4B5 +5 \U0001F6E1 +10'
+                r.hincrby(win, 's_defense', 10 * battle_reward_multiplier)
+                class_reward = f'\U0001F46E: \U0001F4B5 +{5 * battle_reward_multiplier} \U0001F6E1 +{10 * battle_reward_multiplier}'
             elif int(r.hget(win, 'defense')) == 0:
                 r.hset(win, 'defense', 16)
-                r.hincrby(win, 's_defense', 10)
-                class_reward = '\U0001F46E: \U0001F4B5 +5 \U0001F6E1 +10'
+                r.hincrby(win, 's_defense', 10 * battle_reward_multiplier)
+                class_reward = f'\U0001F46E: \U0001F4B5 +{5 * battle_reward_multiplier} \U0001F6E1 +{10 * battle_reward_multiplier}'
     elif location == 'Битва в офісі ОПЗЖ':
         if wc == 7 or wc == 17 or wc == 27:
-            class_reward = '\U0001F921: \U0001F3C5 +1 \U0001F3C6 +5'
-            r.hincrby(win, 'wins', 5)
+            class_reward = f'\U0001F921: \U0001F3C5 +1 \U0001F3C6 +{5 * battle_reward_multiplier}'
+            r.hincrby(win, 'wins', 5 * battle_reward_multiplier)
             r.hincrby(win, 'trophy', 1)
             r.hincrby('all_trophy', 'trophy', 1)
     elif location == 'Битва в серверній кімнаті':
         if wc == 8 or wc == 18 or wc == 28:
-            class_reward = '\U0001F4DF: \U0001F4B5 +20'
-            r.hincrby(win, 'money', 20)
+            class_reward = f'\U0001F4DF: \U0001F4B5 +{20 * battle_reward_multiplier}'
+            r.hincrby(win, 'money', 20 * battle_reward_multiplier)
     elif location == 'Битва в психлікарні':
         if wc == 9 or wc == 19 or wc == 29:
-            class_reward = '\u26D1: \U0001fac0 +100\n\U0001F464 +10 всім іншим учасникам битви.'
+            class_reward = f'\u26D1: \U0001fac0 +{100 * battle_reward_multiplier}\n\U0001F464 +10 всім іншим учасникам битви.'
             r.srem('fighters' + str(cid), win)
             for member in r.smembers('fighters' + str(cid)):
                 if check_vss(member):
                     r.hincrby(member, 'sch', 10)
-            hp(100, win)
+            hp(100 * battle_reward_multiplier, win)
         else:
-            class_reward = '\U0001F5FA: \U0001F464 +10'
+            class_reward = f'\U0001F5FA: \U0001F464 +{10 * battle_reward_multiplier}'
             if check_vss(win):
-                r.hincrby(win, 'sch', 10)
+                r.hincrby(win, 'sch', 10 * battle_reward_multiplier)
     elif location == 'Битва в темному провулку':
         if wc == 10 or wc == 20 or wc == 30:
-            class_reward = '\U0001F6AC: \U0001F3C5 +1 \U0001F44A +1 \u2622 +1 \U0001F4B5 +8'
+            class_reward = f'\U0001F6AC: \U0001F3C5 +1 \U0001F44A +{battle_reward_multiplier} \u2622 +{battle_reward_multiplier} \U0001F4B5 +{8 * battle_reward_multiplier}'
             r.hincrby(win, 'trophy', 1)
             r.hincrby('all_trophy', 'trophy', 1)
-            increase_trance(1, win)
-            r.hincrby(win, 'money', 8)
-            r.hincrby(win, 'vodka', 1)
-            r.hincrby('all_vodka', 'vodka', 1)
+            increase_trance(battle_reward_multiplier, win)
+            r.hincrby(win, 'money', 8 * battle_reward_multiplier)
+            r.hincrby(win, 'vodka', battle_reward_multiplier)
+            r.hincrby('all_vodka', 'vodka', battle_reward_multiplier)
         for member in r.smembers('fighters' + str(cid)):
             quest(member, 3, -2, 1)
     elif location == 'Битва біля розбитої колони':
         if wc in (31, 32, 33):
-            class_reward = '\U0001F695: \U0001F4E6 +2'
-            r.hincrby(win, 'packs', 1)
+            class_reward = f'\U0001F695: \U0001F4E6 +{2 * battle_reward_multiplier}'
+            r.hincrby(win, 'packs', battle_reward_multiplier)
     elif location == 'Розгром командного пункту':
         if wc in (34, 35, 36):
-            class_reward = '\U0001F396: \U0001F4B5 +7'
-            r.hincrby(win, 'money', 7)
+            class_reward = f'\U0001F396: \U0001F4B5 +{7 * battle_reward_multiplier}'
+            r.hincrby(win, 'money', 7 * battle_reward_multiplier)
             if checkClan(win):
-                class_reward += ' \U0001F4FB +3'
-                r.hincrby('c' + r.hget(win, 'clan').decode(), 'technics', 3)
+                class_reward += f' \U0001F4FB +{3 * battle_reward_multiplier}'
+                r.hincrby('c' + r.hget(win, 'clan').decode(), 'technics', 3 * battle_reward_multiplier)
     elif location == 'Битва біля новорічної ялинки':
         class_reward = '\U0001F381: Всі бійці отримали подарунок.'
         # winners = r.srandmember('fighters' + str(cid), 3)
@@ -1715,6 +1717,7 @@ async def war_power(sett, cid):
 
 def war_reward(cid1, cid2, msg, r_spirit, money, general, clan, members, koj, power):
     reward, packs = '4', 0
+    reward_multiplier = 3 if cid1 == -1001211933154 else 2
     if cid1 == -1001211933154:
         money = randint(4, 15)
         reward = str(money)
@@ -1749,12 +1752,17 @@ def war_reward(cid1, cid2, msg, r_spirit, money, general, clan, members, koj, po
         pass
     if clan == 5 and int(r.hget('c' + str(cid1), 'base')) > 1:
         money += 4
+    money *= reward_multiplier
+    packs *= reward_multiplier
+    r_spirit *= reward_multiplier
+    reward = str(money)
+    if clan == 5 and int(r.hget('c' + str(cid1), 'base')) > 1:
         reward = f'{money} \U0001F47E +{r_spirit}'
         if packs:
             reward += f' \U0001F4E6 +{packs}'
     for n in members:
         r.hincrby(n, 'trophy', 1)
-        r.hincrby(n, 'wins', 1)
+        r.hincrby(n, 'wins', reward_multiplier)
         r.hincrby(n, 'money', money)
         r.hincrby(n, 'packs', packs)
         quest(n, 3, 1, 2)
@@ -1821,7 +1829,9 @@ async def great_war(cid1, cid2, a, b, tid1, tid2):
         msg, reward = war_reward(cid1, cid2, msg, r_spirit, money, gen12, clan1, a, koj1, int(chance1))
     elif win == ['b']:
         msg, reward = war_reward(cid2, cid1, msg, r_spirit, money, gen22, clan2, b, koj2, int(chance2))
-    msg += ' перемагають!\n\U0001F3C5 +1 \U0001F3C6 +1 \U0001F4B5 +' + reward
+    winner_chat = cid1 if win == ['a'] else cid2
+    winner_multiplier = 3 if winner_chat == -1001211933154 else 2
+    msg += f' перемагають!\n\U0001F3C5 +1 \U0001F3C6 +{winner_multiplier} \U0001F4B5 +' + reward
     msg1 = msg2 = msg.replace('@', '')
     promo_code = r.hget('promo_code', 'active_clan_promo_code')
     if promo_code:

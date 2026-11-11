@@ -17,8 +17,7 @@ from methods import feed_rusak, mine_salt, checkClan, checkLeader, com, c_shop, 
     wood, stone, cloth, brick, auto_clan_settings, q_points, anti_clicker, msg_fmt
 
 
-# Тимчасово вимкнено до офіційного відновлення сервісу повітряних тривог.
-# from alerts.alert import generate_map
+from alerts.alert import generate_map
 from constants.names import names, names_case
 from constants.classes import class_name, icons, icons_simple
 from constants.photos import p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, premium, premium2, premium3, stalker, default
@@ -80,7 +79,8 @@ async def send_welcome(message):
               '⛏ Обов\'язково заходь в <a href="https://t.me/+2siFLxsiIuY3ODEy">Соледар</a>, ' \
               'особливо коли не маєш з ким грати. Там легко можна знайти собі клан\n\n' \
               '🖲 Введи <code>@RandomUA3bot</code>, щоб почати битву русаків або обрати одну з функцій рандому\n\n' \
-              '📚 У /wiki зібрана вся актуальна інфа по грі, а на @randomuanews можна слідкувати за оновленнями'
+              '📚 У /wiki зібрана вся актуальна інфа по грі, а на @randomuanews можна слідкувати за оновленнями\n\n' \
+              '🚨 Слід зазначити, що бот може надати карту тривог. Для цього напиши <code>Тривога</code> або /alert'
         await message.reply(msg, disable_web_page_preview=True, parse_mode='HTML')
         '''
         if str(uid).encode() not in r.smembers('sudoers'):
@@ -107,7 +107,8 @@ async def get_help(message):
           '⛏ Обов\'язково заходь в <a href="https://t.me/+2siFLxsiIuY3ODEy">Соледар</a>, ' \
           'особливо коли не маєш з ким грати. Там легко можна знайти собі клан\n\n' \
           '🖲 Введи <code>@RandomUA3bot</code>, щоб почати битву русаків або обрати одну з функцій рандому\n\n' \
-          '📚 У /wiki зібрана вся актуальна інфа по грі, а на @randomuanews можна слідкувати за оновленнями'
+          '📚 У /wiki зібрана вся актуальна інфа по грі, а на @randomuanews можна слідкувати за оновленнями\n\n' \
+          '🚨 Слід зазначити, що бот може надати карту тривог. Для цього напиши <code>Тривога</code> або /alert'
     await message.reply(msg, disable_web_page_preview=True, parse_mode='HTML')
 
 
@@ -7092,27 +7093,26 @@ async def echo(message):
         #                            reply_to_message_id=message.message_id)
         #     r.hincrby('logs', 'alert_count', 1)
 
-        # Тимчасово вимкнено через наслідки кібератаки на офіційні джерела.
-        # elif message.text.lower() in ('тривога', '/alert'):
-        #     input_svg = "alerts/ua_regions.svg"
-        #     webp_file = "ua_regions.webp"
-        #
-        #     ts = int(datetime.now().timestamp())
-        #     alert_info = r.hmget('alerts_in_ua', 'timestamp', 'alert')
-        #
-        #     if not alert_info[0] or ts - int(alert_info[0].decode()) > 7 or not path.isfile(webp_file):
-        #         r.hset('alerts_in_ua', 'timestamp', ts)
-        #         response = requests.get(f'https://api.alerts.in.ua/v1/iot/active_air_raid_alerts_by_oblast.json'
-        #                                 f'?token={environ.get("ALERTS_TOKEN")}')
-        #         current_alert = response.text.replace('"', '')
-        #         if not alert_info[1] or alert_info[1].decode() != current_alert or not path.isfile(webp_file):
-        #             r.hset('alerts_in_ua', 'alert', current_alert)
-        #             generate_map(input_svg, webp_file, current_alert)
-        #
-        #     await bot.send_sticker(message.chat.id,
-        #                            open(webp_file, "rb"),
-        #                            reply_to_message_id=message.message_id)
-        #     r.hincrby('logs', 'alert_count', 1)
+        elif message.text.lower() in ('тривога', '/alert'):
+            input_svg = "alerts/ua_regions.svg"
+            webp_file = "ua_regions.webp"
+
+            ts = int(datetime.now().timestamp())
+            alert_info = r.hmget('alerts_in_ua', 'timestamp', 'alert')
+
+            if not alert_info[0] or ts - int(alert_info[0].decode()) > 7 or not path.isfile(webp_file):
+                r.hset('alerts_in_ua', 'timestamp', ts)
+                response = requests.get(f'https://api.alerts.in.ua/v1/iot/active_air_raid_alerts_by_oblast.json'
+                                        f'?token={environ.get("ALERTS_TOKEN")}')
+                current_alert = response.text.replace('"', '')
+                if not alert_info[1] or alert_info[1].decode() != current_alert or not path.isfile(webp_file):
+                    r.hset('alerts_in_ua', 'alert', current_alert)
+                    generate_map(input_svg, webp_file, current_alert)
+
+            await bot.send_sticker(message.chat.id,
+                                   open(webp_file, "rb"),
+                                   reply_to_message_id=message.message_id)
+            r.hincrby('logs', 'alert_count', 1)
 
         elif message.text.lower() == '/fix':
             layout_en = "`~@#$%^&qwertyuiop[]QWERTYUIOP{}asdfghjkl;'\\ASDFGHJKL:\"|zxcvbnm,./ZXCVBNM<>?"
