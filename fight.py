@@ -1715,7 +1715,7 @@ async def war_power(sett, cid):
     return chance, clan5, mal, gen1, gen2, koj, med
 
 
-def war_reward(cid1, cid2, msg, r_spirit, money, general, clan, members, koj, power):
+def war_reward(cid1, cid2, msg, r_spirit, money, general, clan, members, koj, power, trophy_count=1):
     reward, packs = '4', 0
     reward_multiplier = 3 if cid1 == -1001211933154 else 2
     if cid1 == -1001211933154:
@@ -1761,12 +1761,12 @@ def war_reward(cid1, cid2, msg, r_spirit, money, general, clan, members, koj, po
         if packs:
             reward += f' \U0001F4E6 +{packs}'
     for n in members:
-        r.hincrby(n, 'trophy', 1)
+        r.hincrby(n, 'trophy', trophy_count)
         r.hincrby(n, 'wins', reward_multiplier)
         r.hincrby(n, 'money', money)
         r.hincrby(n, 'packs', packs)
         quest(n, 3, 1, 2)
-    r.hincrby('all_trophy', 'trophy', 5)
+    r.hincrby('all_trophy', 'trophy', 5 * trophy_count)
     r.hincrby(222, cid1, 1)
     if clan >= 5:
         for n in members:
@@ -1825,13 +1825,23 @@ async def great_war(cid1, cid2, a, b, tid1, tid2):
 
     msg = 'Міжчатова битва русаків завершена!\n\n\U0001F3C6 Бійці з '
     reward, money, r_spirit = '', 4, 1
-    if win == ['a']:
-        msg, reward = war_reward(cid1, cid2, msg, r_spirit, money, gen12, clan1, a, koj1, int(chance1))
-    elif win == ['b']:
-        msg, reward = war_reward(cid2, cid1, msg, r_spirit, money, gen22, clan2, b, koj2, int(chance2))
     winner_chat = cid1 if win == ['a'] else cid2
+    winner_power = chance1 if win == ['a'] else chance2
+    loser_power = chance2 if win == ['a'] else chance1
+    trophy_count = 1
+    if winner_chat != -1001211933154 and loser_power > 0:
+        if winner_power <= loser_power * 0.7:
+            trophy_count = 3
+        elif winner_power <= loser_power * 0.85:
+            trophy_count = 2
+    if win == ['a']:
+        msg, reward = war_reward(cid1, cid2, msg, r_spirit, money, gen12, clan1, a, koj1,
+                                 int(chance1), trophy_count)
+    elif win == ['b']:
+        msg, reward = war_reward(cid2, cid1, msg, r_spirit, money, gen22, clan2, b, koj2,
+                                 int(chance2), trophy_count)
     winner_multiplier = 3 if winner_chat == -1001211933154 else 2
-    msg += f' перемагають!\n\U0001F3C5 +1 \U0001F3C6 +{winner_multiplier} \U0001F4B5 +' + reward
+    msg += f' перемагають!\n\U0001F3C5 +{trophy_count} \U0001F3C6 +{winner_multiplier} \U0001F4B5 +' + reward
     msg1 = msg2 = msg.replace('@', '')
     promo_code = r.hget('promo_code', 'active_clan_promo_code')
     if promo_code:

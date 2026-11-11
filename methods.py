@@ -20,7 +20,7 @@ def feed_rusak(intel):
 
 def mine_salt(s2, w, day):
     success = int(choice(['1', '1', '1', '1', '0']))
-    money = randint(3, 8)
+    money = randint(80, 200)
     if s2 == 2:
         money += 1
     elif s2 >= 3:
