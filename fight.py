@@ -1415,10 +1415,6 @@ async def war(cid, location, big_battle):
         r.hincrby(win, 'money', money)
     class_reward = ''
 
-    if wc in (31, 32, 33) and location != 'Висадка в Чорнобаївці' and big_battle:
-        class_reward = '\U0001F695: \U0001F4E6 +1'
-        r.hincrby(win, 'packs', 1)
-
     location_makiivske_ptu = special_battle_name('makiivske_ptu')
     location_stolovka = special_battle_name('stolovka')
     location_luhanska_bursa = special_battle_name('luhanska_bursa')
