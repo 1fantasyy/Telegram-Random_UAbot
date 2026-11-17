@@ -15,8 +15,7 @@ from content.inventory import check_set
 
 
 def special_battle_location(cid, regular_locations):
-    chance = r.hget('battle_special_chance', cid)
-    chance = int(chance) if chance is not None else 20
+    chance = 0
     special_locations = []
     for location_key in r.smembers('battle_special_locations'):
         allowed_chats_key = f'battle_special_location_chats:{location_key.decode()}'
